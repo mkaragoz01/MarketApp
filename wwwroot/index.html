@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Market Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+</head>
+<body data-page="products">
+  <div class="page">
+
+    <nav class="topnav">
+      <a href="index.html" class="topnav-brand">
+        <span class="topnav-brand-icon">M</span>
+        Mini Market
+      </a>
+      <div class="topnav-links">
+        <a href="index.html" class="topnav-link" data-nav="products">Ürünler</a>
+        <a href="dashboard.html" class="topnav-link" data-nav="dashboard" data-admin-only hidden>Dashboard</a>
+        <a href="users.html" class="topnav-link" data-nav="users" data-admin-only hidden>Kullanıcılar</a>
+        <a href="logs.html" class="topnav-link" data-nav="logs" data-admin-only hidden>Loglar</a>
+      </div>
+      <div class="topnav-auth">
+        <span class="topnav-user" id="nav-user-info" hidden>
+          <strong id="nav-username"></strong>
+          <span id="nav-role" class="role-chip"></span>
+        </span>
+        <button type="button" id="nav-logout-btn" class="btn btn-sm btn-ghost" hidden>Çıkış</button>
+        <a href="login.html" class="btn btn-sm btn-primary btn-login" id="nav-login-btn">Giriş Yap</a>
+      </div>
+    </nav>
+
+    <header class="header">
+      <div class="header-badge">Market App</div>
+      <h1>Mini Market</h1>
+      <p class="subtitle" id="header-subtitle">Ürünleri görüntüleyin veya giriş yaparak yönetin.</p>
+    </header>
+
+    <main class="container layout-stack">
+
+      <!-- Ürün yönetimi (sadece admin) -->
+      <section id="management-panel" class="panel-card panel-management" hidden>
+        <div class="panel-header">
+          <span class="panel-icon panel-icon-accent" aria-hidden="true">+</span>
+          <div>
+            <h2 class="panel-title" id="form-title">Yeni ürün ekle</h2>
+            <p class="panel-desc">Ürün ekleme ve güncelleme</p>
+          </div>
+        </div>
+
+        <form id="product-form" class="form">
+          <div class="form-grid">
+            <div class="form-row">
+              <label for="name">Ürün adı</label>
+              <input type="text" id="name" name="name" required placeholder="Örn. Süt" autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <label for="unit">Birim</label>
+              <select id="unit" name="unit" required>
+                <option value="Adet">Adet</option>
+                <option value="Kg">Kg</option>
+                <option value="Litre">Litre</option>
+                <option value="Paket">Paket</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="price">Fiyat (₺)</label>
+              <input type="number" id="price" name="price" required min="0.01" step="0.01" placeholder="0,00" />
+            </div>
+            <div class="form-row">
+              <label for="stock">Stok</label>
+              <input type="number" id="stock" name="stock" required min="0" step="1" placeholder="0" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="submit-btn" class="btn btn-primary">
+              <span id="submit-btn-text">Ürün ekle</span>
+            </button>
+            <button type="button" id="cancel-edit-btn" class="btn btn-ghost" hidden>İptal</button>
+          </div>
+        </form>
+        <p id="form-message" class="toast" hidden></p>
+      </section>
+
+      <!-- Ürün listesi (herkese açık) -->
+      <section class="panel-card panel-products">
+        <div class="panel-header list-header">
+          <div class="panel-header-left">
+            <span class="panel-icon card-icon-list" aria-hidden="true">≡</span>
+            <div>
+              <h2 class="panel-title">Ürün listesi</h2>
+              <p id="product-count" class="product-count">—</p>
+            </div>
+          </div>
+          <button type="button" id="refresh-btn" class="btn btn-ghost btn-sm" title="Listeyi yenile">Yenile</button>
+        </div>
+
+        <p id="guest-hint" class="guest-hint">
+          Bu liste herkese açıktır. Ürün eklemek veya düzenlemek için Admin rolü gerekir.
+        </p>
+
+        <div class="search-row">
+          <input type="search" id="search-input" class="search-input" placeholder="Ürün adıyla ara…" autocomplete="off" />
+          <p id="search-hint" class="search-hint" hidden>
+            Arama açıkken sıralama devre dışı. Sonuçlar sayfa sayfa getirilir.
+          </p>
+        </div>
+
+        <p id="load-error" class="toast toast-error" hidden></p>
+        <div class="table-wrap">
+          <table>
+            <thead id="products-thead">
+              <tr>
+                <th>#</th>
+                <th>Ürün</th>
+                <th>Birim</th>
+                <th>Fiyat</th>
+                <th>Stok</th>
+              </tr>
+            </thead>
+            <tbody id="products-body">
+              <tr>
+                <td colspan="5" class="empty">
+                  <span class="spinner" aria-hidden="true"></span>
+                  Yükleniyor…
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="pagination-controls" class="pagination-row" hidden>
+          <button type="button" id="prev-page-btn" class="btn btn-ghost btn-sm">Önceki</button>
+          <span id="pagination-info" class="pagination-info">Sayfa 1 / 1</span>
+          <button type="button" id="next-page-btn" class="btn btn-ghost btn-sm">Sonraki</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ASP.NET Core · JWT · EF Core</span>
+    </footer>
+  </div>
+
+  <script src="auth.js?v=nav-20260606b"></script>
+  <script src="products.js?v=nav-20260606b"></script>
+</body>
+</html>

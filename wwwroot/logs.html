@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log Kayıtları | Mini Market Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+</head>
+<body data-page="logs">
+  <div class="page">
+
+    <nav class="topnav">
+      <a href="index.html" class="topnav-brand">
+        <span class="topnav-brand-icon">M</span>
+        Mini Market
+      </a>
+      <div class="topnav-links">
+        <a href="index.html" class="topnav-link" data-nav="products">Ürünler</a>
+        <a href="dashboard.html" class="topnav-link" data-nav="dashboard" data-admin-only hidden>Dashboard</a>
+        <a href="users.html" class="topnav-link" data-nav="users" data-admin-only hidden>Kullanıcılar</a>
+        <a href="logs.html" class="topnav-link" data-nav="logs" data-admin-only hidden>Loglar</a>
+      </div>
+      <div class="topnav-auth">
+        <span class="topnav-user" id="nav-user-info" hidden>
+          <strong id="nav-username"></strong>
+          <span id="nav-role" class="role-chip"></span>
+        </span>
+        <button type="button" id="nav-logout-btn" class="btn btn-sm btn-ghost" hidden>Çıkış</button>
+        <a href="login.html" class="btn btn-sm btn-primary btn-login" id="nav-login-btn">Giriş Yap</a>
+      </div>
+    </nav>
+
+    <header class="header">
+      <div class="header-badge">Market App</div>
+      <h1>Log Kayıtları</h1>
+      <p class="subtitle" id="header-subtitle">Backend olaylarını, uyarıları ve hataları takip edin.</p>
+    </header>
+
+    <main class="container layout-stack">
+      <section id="access-denied" class="panel-card panel-auth" hidden>
+        <div class="panel-header">
+          <span class="panel-icon" aria-hidden="true">!</span>
+          <div>
+            <h2 class="panel-title">Yetki gerekli</h2>
+            <p class="panel-desc">Bu sayfayı sadece Admin rolündeki kullanıcılar açabilir.</p>
+          </div>
+        </div>
+        <div class="form-actions">
+          <a href="login.html?returnUrl=logs.html" class="btn btn-primary btn-login">Admin girişi yap</a>
+          <a href="index.html" class="btn btn-ghost">Ürün listesine dön</a>
+        </div>
+      </section>
+
+      <section id="logs-panel" class="panel-card panel-products" hidden>
+        <div class="panel-header list-header">
+          <div class="panel-header-left">
+            <span class="panel-icon card-icon-list" aria-hidden="true">≡</span>
+            <div>
+              <h2 class="panel-title">Kayıtlar</h2>
+              <p id="log-count" class="product-count">—</p>
+            </div>
+          </div>
+          <div class="row-actions">
+            <button type="button" id="export-logs-btn" class="btn btn-primary btn-sm" data-admin-only hidden>Excel'e aktar</button>
+            <button type="button" id="refresh-logs-btn" class="btn btn-ghost btn-sm">Yenile</button>
+          </div>
+        </div>
+
+        <form id="log-filter-form" class="form log-filter-form">
+          <div class="form-grid log-filter-grid">
+            <div class="form-row">
+              <label for="log-level">Seviye</label>
+              <select id="log-level">
+                <option value="">Tümü</option>
+                <option value="Information">Information</option>
+                <option value="Warning">Warning</option>
+                <option value="Error">Error</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="log-search">Arama</label>
+              <input type="search" id="log-search" placeholder="Mesaj, kullanıcı, path..." autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <label for="log-from">Başlangıç</label>
+              <input type="datetime-local" id="log-from" />
+            </div>
+            <div class="form-row">
+              <label for="log-to">Bitiş</label>
+              <input type="datetime-local" id="log-to" />
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-login">Filtrele</button>
+            <button type="button" id="clear-log-filters-btn" class="btn btn-ghost">Temizle</button>
+          </div>
+        </form>
+
+        <p id="logs-load-error" class="toast toast-error" hidden></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tarih</th>
+                <th>Seviye</th>
+                <th>Mesaj</th>
+                <th>Kullanıcı</th>
+                <th>Path</th>
+              </tr>
+            </thead>
+            <tbody id="logs-body">
+              <tr>
+                <td colspan="5" class="empty">
+                  <span class="spinner" aria-hidden="true"></span>
+                  Yükleniyor...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ASP.NET Core · JWT · EF Core</span>
+    </footer>
+  </div>
+
+  <script src="auth.js?v=nav-20260606b"></script>
+  <script src="logs.js?v=nav-20260606b"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Mini Market Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+</head>
+<body data-page="dashboard">
+  <div class="page">
+
+    <nav class="topnav">
+      <a href="index.html" class="topnav-brand">
+        <span class="topnav-brand-icon">M</span>
+        Mini Market
+      </a>
+      <div class="topnav-links">
+        <a href="index.html" class="topnav-link" data-nav="products">Ürünler</a>
+        <a href="dashboard.html" class="topnav-link" data-nav="dashboard" data-admin-only hidden>Dashboard</a>
+        <a href="users.html" class="topnav-link" data-nav="users" data-admin-only hidden>Kullanıcılar</a>
+        <a href="logs.html" class="topnav-link" data-nav="logs" data-admin-only hidden>Loglar</a>
+      </div>
+      <div class="topnav-auth">
+        <span class="topnav-user" id="nav-user-info" hidden>
+          <strong id="nav-username"></strong>
+          <span id="nav-role" class="role-chip"></span>
+        </span>
+        <button type="button" id="nav-logout-btn" class="btn btn-sm btn-ghost" hidden>Çıkış</button>
+        <a href="login.html" class="btn btn-sm btn-primary btn-login" id="nav-login-btn">Giriş Yap</a>
+      </div>
+    </nav>
+
+    <header class="header">
+      <div class="header-badge">Market App</div>
+      <h1>Dashboard</h1>
+      <p class="subtitle" id="header-subtitle">Ürün ve stok istatistiklerini takip edin.</p>
+    </header>
+
+    <main class="container layout-stack">
+      <section id="access-denied" class="panel-card panel-auth" hidden>
+        <div class="panel-header">
+          <span class="panel-icon" aria-hidden="true">!</span>
+          <div>
+            <h2 class="panel-title">Yetki gerekli</h2>
+            <p class="panel-desc">Bu sayfayı sadece Admin rolündeki kullanıcılar açabilir.</p>
+          </div>
+        </div>
+        <div class="form-actions">
+          <a href="login.html?returnUrl=dashboard.html" class="btn btn-primary btn-login">Admin girişi yap</a>
+          <a href="index.html" class="btn btn-ghost">Ürün listesine dön</a>
+        </div>
+      </section>
+
+      <section id="dashboard-panel" class="panel-card panel-dashboard" data-admin-only hidden>
+        <div class="panel-header list-header">
+          <div class="panel-header-left">
+            <span class="panel-icon panel-icon-accent" aria-hidden="true">#</span>
+            <div>
+              <h2 class="panel-title">Yönetim özeti</h2>
+              <p class="panel-desc">Ürün sayısı, stok ve değer bilgileri</p>
+            </div>
+          </div>
+          <button type="button" id="refresh-dashboard-btn" class="btn btn-ghost btn-sm">Yenile</button>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="dashboard-tile">
+            <span class="dashboard-label">Toplam ürün</span>
+            <strong id="dashboard-total-products" class="dashboard-value">—</strong>
+          </div>
+          <div class="dashboard-tile">
+            <span class="dashboard-label">Toplam stok</span>
+            <strong id="dashboard-total-stock" class="dashboard-value">—</strong>
+          </div>
+          <div class="dashboard-tile">
+            <span class="dashboard-label">Stok değeri</span>
+            <strong id="dashboard-total-value" class="dashboard-value">—</strong>
+          </div>
+          <div class="dashboard-tile">
+            <span class="dashboard-label">En pahalı ürün</span>
+            <strong id="dashboard-most-expensive" class="dashboard-value dashboard-product-name">—</strong>
+            <span id="dashboard-most-expensive-detail" class="dashboard-detail">—</span>
+          </div>
+        </div>
+
+        <div class="dashboard-low-stock">
+          <div class="dashboard-low-stock-header">
+            <h3>Stoğu azalan ürünler</h3>
+            <span id="dashboard-low-stock-threshold" class="dashboard-detail">—</span>
+          </div>
+          <div id="dashboard-low-stock-list" class="dashboard-low-stock-list">
+            <p class="dashboard-empty">Yükleniyor...</p>
+          </div>
+        </div>
+
+        <p id="dashboard-message" class="toast toast-error" hidden></p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ASP.NET Core · JWT · EF Core</span>
+    </footer>
+  </div>
+
+  <script src="auth.js?v=nav-20260606b"></script>
+  <script src="dashboard.js?v=nav-20260606b"></script>
+</body>
+</html>

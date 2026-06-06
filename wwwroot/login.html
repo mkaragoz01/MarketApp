@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giriş | Mini Market Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+</head>
+<body data-page="login">
+  <div class="page">
+
+    <nav class="topnav">
+      <a href="index.html" class="topnav-brand">
+        <span class="topnav-brand-icon">M</span>
+        Mini Market
+      </a>
+      <div class="topnav-links">
+        <a href="index.html" class="topnav-link" data-nav="products">Ürünler</a>
+        <a href="dashboard.html" class="topnav-link" data-nav="dashboard" data-admin-only hidden>Dashboard</a>
+        <a href="users.html" class="topnav-link" data-nav="users" data-admin-only hidden>Kullanıcılar</a>
+        <a href="logs.html" class="topnav-link" data-nav="logs" data-admin-only hidden>Loglar</a>
+      </div>
+      <div class="topnav-auth">
+        <span class="topnav-user" id="nav-user-info" hidden>
+          <strong id="nav-username"></strong>
+          <span id="nav-role" class="role-chip"></span>
+        </span>
+        <button type="button" id="nav-logout-btn" class="btn btn-sm btn-ghost" hidden>Çıkış</button>
+        <!-- nav-login-btn login sayfasında gizlenir (auth.js) -->
+        <a href="index.html" class="btn btn-sm btn-primary btn-login" id="nav-login-btn" hidden>Giriş Yap</a>
+      </div>
+    </nav>
+
+    <header class="header">
+      <div class="header-badge">Market App</div>
+      <h1>Hesap</h1>
+      <p class="subtitle" id="header-subtitle">Giriş yapın veya yeni hesap oluşturun.</p>
+    </header>
+
+    <main class="container auth-container layout-stack">
+      <section id="auth-section" class="panel-card panel-auth">
+        <div class="panel-header">
+          <span class="panel-icon" aria-hidden="true">🔐</span>
+          <div>
+            <h2 class="panel-title">Giriş</h2>
+            <p class="panel-desc">Ürünleri yönetmek için oturum açın</p>
+          </div>
+        </div>
+
+        <div class="auth-tabs">
+          <button type="button" class="auth-tab active" data-auth-tab="login">Giriş</button>
+          <button type="button" class="auth-tab" data-auth-tab="register">Kayıt Ol</button>
+        </div>
+
+        <form id="login-form" class="auth-form">
+          <div class="form-row">
+            <label for="login-username">Kullanıcı adı</label>
+            <input type="text" id="login-username" required autocomplete="username" />
+          </div>
+          <div class="form-row">
+            <label for="login-password">Şifre</label>
+            <input type="password" id="login-password" required autocomplete="current-password" />
+          </div>
+          <button type="submit" class="btn btn-primary">Giriş yap</button>
+        </form>
+
+        <form id="register-form" class="auth-form" hidden>
+          <div class="form-row">
+            <label for="register-username">Kullanıcı adı</label>
+            <input type="text" id="register-username" required autocomplete="username" />
+          </div>
+          <div class="form-row">
+            <label for="register-password">Şifre</label>
+            <input type="password" id="register-password" required minlength="4" autocomplete="new-password" />
+          </div>
+          <button type="submit" class="btn btn-primary">Kayıt ol</button>
+        </form>
+
+        <p id="auth-message" class="toast" hidden></p>
+      </section>
+
+      <!-- Zaten giriş yapılmışsa göster -->
+      <section id="session-section" class="panel-card panel-session" hidden>
+        <div class="panel-header">
+          <span class="panel-icon" aria-hidden="true">✓</span>
+          <div>
+            <h2 class="panel-title">Oturum açık</h2>
+            <p class="panel-desc" id="session-desc">Ürün listesine dönebilirsiniz</p>
+          </div>
+        </div>
+        <p class="session-user">
+          Merhaba, <strong id="display-username"></strong>
+          <span id="display-role" class="role-chip"></span>
+        </p>
+        <div class="form-actions">
+          <a class="btn btn-primary btn-login" href="index.html">Ürün listesine dön</a>
+          <button type="button" id="logout-btn" class="btn btn-ghost">Çıkış yap</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ASP.NET Core · JWT · EF Core</span>
+    </footer>
+  </div>
+
+  <script src="auth.js?v=nav-20260606b"></script>
+</body>
+</html>

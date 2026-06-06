@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kullanıcı Yönetimi | Mini Market Yönetimi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+</head>
+<body data-page="users">
+  <div class="page">
+
+    <nav class="topnav">
+      <a href="index.html" class="topnav-brand">
+        <span class="topnav-brand-icon">M</span>
+        Mini Market
+      </a>
+      <div class="topnav-links">
+        <a href="index.html" class="topnav-link" data-nav="products">Ürünler</a>
+        <a href="dashboard.html" class="topnav-link" data-nav="dashboard" data-admin-only hidden>Dashboard</a>
+        <a href="users.html" class="topnav-link" data-nav="users" data-admin-only hidden>Kullanıcılar</a>
+        <a href="logs.html" class="topnav-link" data-nav="logs" data-admin-only hidden>Loglar</a>
+      </div>
+      <div class="topnav-auth">
+        <span class="topnav-user" id="nav-user-info" hidden>
+          <strong id="nav-username"></strong>
+          <span id="nav-role" class="role-chip"></span>
+        </span>
+        <button type="button" id="nav-logout-btn" class="btn btn-sm btn-ghost" hidden>Çıkış</button>
+        <a href="login.html" class="btn btn-sm btn-primary btn-login" id="nav-login-btn">Giriş Yap</a>
+      </div>
+    </nav>
+
+    <header class="header">
+      <div class="header-badge">Market App</div>
+      <h1>Kullanıcı Yönetimi</h1>
+      <p class="subtitle" id="header-subtitle">Admin rolüyle kullanıcıları ve rollerini yönetin.</p>
+    </header>
+
+    <main class="container layout-stack">
+      <section id="access-denied" class="panel-card panel-auth" hidden>
+        <div class="panel-header">
+          <span class="panel-icon" aria-hidden="true">!</span>
+          <div>
+            <h2 class="panel-title">Yetki gerekli</h2>
+            <p class="panel-desc">Bu sayfayı sadece Admin rolündeki kullanıcılar açabilir.</p>
+          </div>
+        </div>
+        <div class="form-actions">
+          <a href="login.html?returnUrl=users.html" class="btn btn-primary btn-login">Admin girişi yap</a>
+          <a href="index.html" class="btn btn-ghost">Ürün listesine dön</a>
+        </div>
+      </section>
+
+      <section id="user-management-panel" class="panel-card panel-management" hidden>
+        <div class="panel-header">
+          <span class="panel-icon panel-icon-accent" aria-hidden="true">+</span>
+          <div>
+            <h2 class="panel-title" id="user-form-title">Yeni kullanıcı ekle</h2>
+            <p class="panel-desc">Kullanıcı adı, şifre ve rol bilgisi</p>
+          </div>
+        </div>
+
+        <form id="user-form" class="form">
+          <div class="form-grid user-form-grid">
+            <div class="form-row">
+              <label for="user-username">Kullanıcı adı</label>
+              <input type="text" id="user-username" required autocomplete="off" />
+            </div>
+            <div class="form-row">
+              <label for="user-password">Şifre</label>
+              <input type="password" id="user-password" required minlength="4" autocomplete="new-password" />
+            </div>
+            <div class="form-row">
+              <label for="user-role">Rol</label>
+              <select id="user-role" required>
+                <option value="User">User</option>
+                <option value="Admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <span id="user-submit-text">Kullanıcı ekle</span>
+            </button>
+            <button type="button" id="cancel-user-edit-btn" class="btn btn-ghost" hidden>İptal</button>
+          </div>
+        </form>
+        <p id="user-form-message" class="toast" hidden></p>
+      </section>
+
+      <section id="users-list-panel" class="panel-card panel-products" hidden>
+        <div class="panel-header list-header">
+          <div class="panel-header-left">
+            <span class="panel-icon card-icon-list" aria-hidden="true">≡</span>
+            <div>
+              <h2 class="panel-title">Kullanıcı listesi</h2>
+              <p id="user-count" class="product-count">—</p>
+            </div>
+          </div>
+          <button type="button" id="refresh-users-btn" class="btn btn-ghost btn-sm">Yenile</button>
+        </div>
+
+        <p id="users-load-error" class="toast toast-error" hidden></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Kullanıcı</th>
+                <th>Rol</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="users-body">
+              <tr>
+                <td colspan="4" class="empty">
+                  <span class="spinner" aria-hidden="true"></span>
+                  Yükleniyor...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ASP.NET Core · JWT · EF Core</span>
+    </footer>
+  </div>
+
+  <script src="auth.js?v=nav-20260606b"></script>
+  <script src="users.js?v=nav-20260606b"></script>
+</body>
+</html>
