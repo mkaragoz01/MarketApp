@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+  <link rel="stylesheet" href="style.css?v=responsive-20260628" />
 </head>
 <body data-page="logs">
   <div class="page">
@@ -63,10 +63,7 @@
               <p id="log-count" class="product-count">—</p>
             </div>
           </div>
-          <div class="row-actions">
-            <button type="button" id="export-logs-btn" class="btn btn-primary btn-sm" data-admin-only hidden>Excel'e aktar</button>
-            <button type="button" id="refresh-logs-btn" class="btn btn-ghost btn-sm">Yenile</button>
-          </div>
+          <button type="button" id="export-logs-btn" class="btn btn-sm btn-excel" data-admin-only hidden>Excel'e aktar</button>
         </div>
 
         <form id="log-filter-form" class="form log-filter-form">
@@ -93,9 +90,10 @@
               <input type="datetime-local" id="log-to" />
             </div>
           </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-login">Filtrele</button>
-            <button type="button" id="clear-log-filters-btn" class="btn btn-ghost">Temizle</button>
+          <div class="log-filter-actions">
+            <button type="submit" class="btn btn-primary btn-sm">Filtrele</button>
+            <button type="reset" id="clear-log-filters-btn" class="btn btn-clear btn-sm">Filtreleri Sıfırla</button>
+            <button type="button" id="refresh-logs-btn" class="btn btn-ghost btn-sm">Yenile</button>
           </div>
         </form>
 
@@ -129,7 +127,7 @@
     </footer>
   </div>
 
-  <script src="auth.js?v=nav-20260606b"></script>
-  <script src="logs.js?v=nav-20260606b"></script>
+  <script src="auth.js?v=logs-20260628b"></script>
+  <script src="logs.js?v=logs-20260628b"></script>
 </body>
 </html>

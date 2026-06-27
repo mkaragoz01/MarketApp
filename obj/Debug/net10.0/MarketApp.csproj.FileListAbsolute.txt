@@ -148,7 +148,6 @@ C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\rjsmrazor.dswa.cache.jso
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\scopedcss\bundle\MarketApp.styles.css
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\j94b1er8tf-{0}-2fodao82rl-2fodao82rl.gz
-C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\8sk8cnecd2-{0}-d4960luy2u-d4960luy2u.gz
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\staticwebassets.build.json
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\staticwebassets.build.json.cache
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\staticwebassets.development.json
@@ -163,10 +162,11 @@ C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\ref\MarketApp.dll
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\MarketApp.sourcelink.json
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\7rd44t9ptv-{0}-zp5bgbl8r7-zp5bgbl8r7.gz
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\jdfuh8w61y-{0}-fglwl2l5bv-fglwl2l5bv.gz
-C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\jwodvi5f7y-{0}-1fd5vpvj0s-1fd5vpvj0s.gz
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\btnr4rfkp6-{0}-2ibsfft2vv-2ibsfft2vv.gz
-C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\38yn42jww5-{0}-chr19md7yb-chr19md7yb.gz
-C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\bh462je448-{0}-jokhvwx3fr-jokhvwx3fr.gz
-C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\7qdeng619t-{0}-aown14dz6p-aown14dz6p.gz
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\dshlkt7pv9-{0}-bogep6whh5-bogep6whh5.gz
 C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\730yewsq9p-{0}-2h3ix62s6s-2h3ix62s6s.gz
+C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\jwodvi5f7y-{0}-u1ldcmlzai-u1ldcmlzai.gz
+C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\bh462je448-{0}-c8aghzukkp-c8aghzukkp.gz
+C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\38yn42jww5-{0}-1rjfhvb41e-1rjfhvb41e.gz
+C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\8sk8cnecd2-{0}-7k7wzi2xye-7k7wzi2xye.gz
+C:\Users\mkaragoz\MarketApp\MarketApp\obj\Debug\net10.0\compressed\7qdeng619t-{0}-jo66q1eup4-jo66q1eup4.gz

@@ -59,24 +59,46 @@ public class ProductController : ControllerBase
 
     [HttpPost("import")]
     [Authorize(Roles = UserRoles.Admin)]
-    public async Task<ActionResult<ProductImportResultDto>> Import([FromForm] IFormFile? file)
+    public async Task<ActionResult<ProductImportResultDto>> Import([FromQuery] string? fileName = null)
     {
-        file ??= Request.HasFormContentType
-            ? Request.Form.Files.GetFile("file") ?? Request.Form.Files.FirstOrDefault()
-            : null;
-
-        if (file is null || file.Length == 0)
-            return BadRequest(new { message = "Excel dosyası boş olamaz." });
-
         try
         {
-            var result = await _productService.ImportExcelAsync(file.OpenReadStream(), file.FileName);
+            var (stream, importFileName) = await ReadImportFileAsync(fileName);
+            if (stream.Length == 0)
+                return BadRequest(new { message = "Excel dosyası boş olamaz." });
+
+            stream.Position = 0;
+            var result = await _productService.ImportExcelAsync(stream, importFileName);
             return Ok(result);
         }
         catch (InvalidDataException ex)
         {
             return BadRequest(new { message = ex.Message });
         }
+    }
+
+    private async Task<(MemoryStream Stream, string FileName)> ReadImportFileAsync(string? fileName)
+    {
+        if (Request.HasFormContentType)
+        {
+            var formFile = Request.Form.Files.GetFile("file") ?? Request.Form.Files.FirstOrDefault();
+            if (formFile is not null)
+            {
+                var formStream = new MemoryStream();
+                await formFile.CopyToAsync(formStream);
+                return (formStream, formFile.FileName);
+            }
+        }
+
+        if ((Request.ContentLength ?? 0) <= 0)
+            throw new InvalidDataException("Excel dosyası boş olamaz.");
+
+        var bodyStream = new MemoryStream();
+        await Request.Body.CopyToAsync(bodyStream);
+
+        var headerFileName = Request.Headers["X-File-Name"].FirstOrDefault();
+        var importFileName = fileName ?? headerFileName ?? "products.xlsx";
+        return (bodyStream, importFileName);
     }
 
     [HttpPost]

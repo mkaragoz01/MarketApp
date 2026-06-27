@@ -311,17 +311,19 @@ async function importProductsFromExcel(file) {
   hideMessage(formMessage);
 
   try {
-    const formData = new FormData();
     if (!file.size) {
       throw new Error("Seçilen Excel dosyası boş görünüyor.");
     }
 
-    formData.append("file", file, file.name);
+    const headers = authHeaders(false);
+    headers["Content-Type"] =
+      file.type || "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    headers["X-File-Name"] = encodeURIComponent(file.name || "products.xlsx");
 
-    const response = await fetch(`${API_URL}/import`, {
+    const response = await fetch(`${API_URL}/import?fileName=${encodeURIComponent(file.name || "products.xlsx")}`, {
       method: "POST",
-      headers: authHeaders(false),
-      body: formData,
+      headers,
+      body: file,
     });
 
     if (!response.ok) {

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=excel-20260627b" />
+  <link rel="stylesheet" href="style.css?v=responsive-20260628" />
 </head>
 <body data-page="products">
   <div class="page">
@@ -43,18 +43,18 @@
 
       <!-- Ürün yönetimi (sadece admin) -->
       <section id="management-panel" class="panel-card panel-management" hidden>
-        <div class="panel-header">
-          <span class="panel-icon panel-icon-accent" aria-hidden="true">+</span>
-          <div>
-            <div class="management-title-row">
+        <div class="panel-header management-header">
+          <div class="management-title-row">
+            <span class="panel-icon panel-icon-accent" aria-hidden="true">+</span>
+            <div>
               <h2 class="panel-title" id="form-title">Yeni ürün ekle</h2>
-              <div class="excel-actions">
-                <input type="file" id="excel-import-input" name="file" accept=".xlsx" hidden />
-                <button type="button" id="excel-import-btn" class="btn btn-excel">Excelden al</button>
-                <button type="button" id="excel-export-btn" class="btn btn-excel">Dışa aktar</button>
-              </div>
+              <p class="panel-desc">Ürün ekleme ve güncelleme</p>
             </div>
-            <p class="panel-desc">Ürün ekleme ve güncelleme</p>
+          </div>
+          <div class="excel-actions">
+            <input type="file" id="excel-import-input" name="file" accept=".xlsx" hidden />
+            <button type="button" id="excel-import-btn" class="btn btn-excel">Excel'den al</button>
+            <button type="button" id="excel-export-btn" class="btn btn-excel">Excel'e aktar</button>
           </div>
         </div>
 

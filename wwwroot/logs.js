@@ -226,9 +226,9 @@ logFilterForm.addEventListener("submit", (e) => {
   loadLogs();
 });
 
-clearLogFiltersBtn.addEventListener("click", () => {
-  logFilterForm.reset();
-  loadLogs();
+logFilterForm.addEventListener("reset", () => {
+  // values are cleared by browser before this fires; reload without filters
+  setTimeout(loadLogs, 0);
 });
 
 refreshLogsBtn.addEventListener("click", loadLogs);

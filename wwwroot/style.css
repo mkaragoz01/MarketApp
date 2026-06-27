@@ -187,6 +187,14 @@ body {
   justify-content: space-between;
 }
 
+.management-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+}
+
 .panel-header-left {
   display: flex;
   align-items: center;
@@ -221,8 +229,7 @@ body {
 
 .management-title-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.75rem;
 }
 
@@ -567,25 +574,31 @@ body {
 .excel-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 .excel-actions .btn {
-  min-width: 108px;
+  min-width: 0;
 }
 
 .btn-excel {
-  padding: 0.4rem 0.65rem;
+  height: 34px;
+  padding: 0 0.75rem;
   color: var(--accent);
-  background: var(--accent-dim);
+  background: rgba(61, 214, 140, 0.08);
   border: 1px solid rgba(61, 214, 140, 0.25);
+  box-shadow: none;
   font-size: 0.8rem;
+  white-space: nowrap;
 }
 
 .btn-excel:hover {
-  color: #0a1612;
-  background: var(--accent);
-  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(61, 214, 140, 0.16);
+  border-color: rgba(61, 214, 140, 0.45);
+  box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 .user-form-grid {
@@ -604,19 +617,35 @@ button:disabled,
 
 .btn-ghost {
   color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
 }
 
 .btn-ghost:hover {
   color: var(--text);
-  background: var(--surface-hover);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
 }
 
 .btn-sm {
   padding: 0.4rem 0.65rem;
   font-size: 0.8rem;
+}
+
+.btn-clear {
+  color: var(--error);
+  background: rgba(255, 107, 107, 0.08);
+  border: 1px solid rgba(255, 107, 107, 0.25);
+  box-shadow: none;
+}
+
+.btn-clear:hover {
+  color: var(--error);
+  background: rgba(255, 107, 107, 0.16);
+  border-color: rgba(255, 107, 107, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.12);
 }
 
 .btn-edit {
@@ -914,6 +943,23 @@ td.price-cell {
   grid-template-columns: 1fr;
 }
 
+.log-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.log-filter-actions .btn-primary {
+  width: auto;
+  min-width: 90px;
+}
+
+.log-filter-actions #refresh-logs-btn {
+  margin-left: auto;
+}
+
 .log-message {
   max-width: 520px;
   font-weight: 600;
@@ -1032,6 +1078,17 @@ tbody tr.row-editing td {
   .btn-login {
     width: 100%;
   }
+
+  .management-header {
+    grid-template-columns: 1fr;
+  }
+
+  .excel-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-left: 0;
+  }
 }
 
 @media (min-width: 760px) {
@@ -1049,5 +1106,136 @@ tbody tr.row-editing td {
 
   .search-row {
     grid-template-columns: minmax(14rem, 1fr) minmax(9rem, 0.35fr) minmax(11rem, 0.45fr);
+  }
+}
+
+/* ─── Responsive: ≤640px ─── */
+@media (max-width: 640px) {
+  /* Hide username/role chip in nav — icon + logout/login remain */
+  .topnav-user {
+    display: none;
+  }
+
+  /* Panel list-headers (title left, action right) stack vertically */
+  .panel-header.list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Don't push Yenile to a lone far-right line when buttons wrap */
+  .log-filter-actions #refresh-logs-btn {
+    margin-left: 0;
+  }
+
+  /* Slightly tighter table cells */
+  th,
+  td {
+    padding: 0.75rem 0.75rem;
+  }
+
+  /* Pagination stays on one row but can wrap gracefully */
+  .pagination-row {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Dashboard: 2 columns on medium-small screens */
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── Responsive: ≤480px ─── */
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.75rem 1.25rem;
+  }
+
+  .header {
+    padding: 1.25rem 0.75rem 1rem;
+  }
+
+  .panel-card {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Tighter topnav */
+  .topnav {
+    padding: 0 0.75rem;
+  }
+
+  .topnav-brand {
+    font-size: 0.82rem;
+    margin-right: 0.15rem;
+  }
+
+  .topnav-link {
+    padding: 0.3rem 0.45rem;
+    font-size: 0.78rem;
+  }
+
+  /* Smaller table cells */
+  th,
+  td {
+    padding: 0.6rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  th {
+    font-size: 0.68rem;
+  }
+
+  /* Smaller form inputs */
+  .form-row input,
+  .form-row select,
+  .search-input,
+  .filter-select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* Dashboard: single column + compact tiles */
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-tile {
+    min-height: auto;
+    padding: 0.75rem;
+  }
+
+  .dashboard-value {
+    font-size: 1.25rem;
+  }
+
+  /* Slightly smaller panel icons */
+  .panel-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  /* Pagination info on its own line above prev/next */
+  .pagination-info {
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Stack log-filter action buttons vertically, full width */
+  .log-filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .log-filter-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .log-filter-actions #refresh-logs-btn {
+    margin-left: 0;
   }
 }
