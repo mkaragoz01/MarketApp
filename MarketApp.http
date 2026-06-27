@@ -4,3 +4,13 @@ GET {{MarketApp_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{MarketApp_HostAddress}}/products?search=ekmek&unit=Adet&sort=name_asc
+Accept: application/json
+
+###
+
+GET {{MarketApp_HostAddress}}/products/export?search=ekmek&unit=Adet&sort=name_asc
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+###

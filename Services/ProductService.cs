@@ -2,6 +2,7 @@ using MarketApp.Data;
 using MarketApp.DTOs;
 using MarketApp.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace MarketApp.Services;
 
@@ -19,17 +20,17 @@ public class ProductService : IProductService
         _logger = logger;
     }
 
-    public async Task<PagedResultDto<ProductDto>> GetPagedAsync(int page, int pageSize, string? search)
+    public async Task<PagedResultDto<ProductDto>> GetPagedAsync(
+        int page,
+        int pageSize,
+        string? search,
+        string? unit,
+        string? sort)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, MaxPageSize);
 
-        var query = _context.Products.AsNoTracking();
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            var normalizedSearch = search.Trim();
-            query = query.Where(p => p.Name.Contains(normalizedSearch));
-        }
+        var query = ApplyFilters(_context.Products.AsNoTracking(), search, unit);
 
         var totalCount = await query.CountAsync();
         var totalPages = totalCount == 0
@@ -39,9 +40,7 @@ public class ProductService : IProductService
         if (page > totalPages)
             page = totalPages;
 
-        var products = await query
-            .OrderBy(p => p.SortOrder)
-            .ThenBy(p => p.Id)
+        var products = await ApplySort(query, sort)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
@@ -56,12 +55,94 @@ public class ProductService : IProductService
         };
 
         _logger.LogInformation(
-            "Products paged. Page: {Page}, PageSize: {PageSize}, Search: {Search}, ReturnedCount: {ReturnedCount}, TotalCount: {TotalCount}",
+            "Products paged. Page: {Page}, PageSize: {PageSize}, Search: {Search}, Unit: {Unit}, Sort: {Sort}, ReturnedCount: {ReturnedCount}, TotalCount: {TotalCount}",
             result.Page,
             result.PageSize,
             search,
+            unit,
+            sort,
             result.Items.Count,
             result.TotalCount);
+
+        return result;
+    }
+
+    public async Task<byte[]> ExportExcelAsync(string? search, string? unit, string? sort)
+    {
+        var products = await ApplySort(ApplyFilters(_context.Products.AsNoTracking(), search, unit), sort)
+            .ToListAsync();
+        var productDtos = products.Select(ToDto).ToList();
+
+        _logger.LogInformation(
+            "Products exported to Excel. Search: {Search}, Unit: {Unit}, Sort: {Sort}, ProductCount: {ProductCount}",
+            search,
+            unit,
+            sort,
+            productDtos.Count);
+
+        return ProductExcelWorkbook.CreateProductsWorkbook(productDtos);
+    }
+
+    public async Task<ProductImportResultDto> ImportExcelAsync(Stream stream, string fileName)
+    {
+        if (!fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Sadece .xlsx Excel dosyası yüklenebilir.");
+
+        var rows = ProductExcelWorkbook.ReadProducts(stream);
+        var result = new ProductImportResultDto
+        {
+            TotalRows = rows.Count
+        };
+
+        if (rows.Count == 0)
+            return result;
+
+        var existingProducts = await _context.Products.ToListAsync();
+        var productsById = existingProducts.ToDictionary(p => p.Id);
+        var productsByName = existingProducts
+            .GroupBy(p => NormalizeProductName(p.Name), StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+        var maxOrder = await _context.Products.MaxAsync(p => (int?)p.SortOrder) ?? 0;
+        var productsToAdd = new List<Product>();
+
+        foreach (var row in rows)
+        {
+            var existingProduct = FindExistingProduct(row, productsById, productsByName);
+            if (existingProduct is not null)
+            {
+                if (TryUpdateProductFromImport(row, existingProduct, productsByName, result))
+                    result.UpdatedCount++;
+                else
+                    result.SkippedCount++;
+
+                continue;
+            }
+
+            if (!TryCreateProductFromImport(row, result, out var newProduct))
+                continue;
+
+            maxOrder++;
+            newProduct.SortOrder = maxOrder;
+            productsToAdd.Add(newProduct);
+            productsByName[NormalizeProductName(newProduct.Name)] = newProduct;
+        }
+
+        if (productsToAdd.Count > 0 || result.UpdatedCount > 0)
+        {
+            _context.Products.AddRange(productsToAdd);
+            await _context.SaveChangesAsync();
+        }
+
+        result.ImportedCount = productsToAdd.Count;
+
+        _logger.LogInformation(
+            "Products imported from Excel. FileName: {FileName}, TotalRows: {TotalRows}, ImportedCount: {ImportedCount}, UpdatedCount: {UpdatedCount}, SkippedCount: {SkippedCount}, ErrorCount: {ErrorCount}",
+            fileName,
+            result.TotalRows,
+            result.ImportedCount,
+            result.UpdatedCount,
+            result.SkippedCount,
+            result.ErrorCount);
 
         return result;
     }
@@ -299,6 +380,242 @@ public class ProductService : IProductService
         Unit = product.Unit,
         SortOrder = product.SortOrder
     };
+
+    private static IQueryable<Product> ApplyFilters(IQueryable<Product> query, string? search, string? unit)
+    {
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var normalizedSearch = search.Trim();
+            query = query.Where(p => p.Name.Contains(normalizedSearch));
+        }
+
+        if (!string.IsNullOrWhiteSpace(unit))
+        {
+            var normalizedUnit = unit.Trim();
+            query = query.Where(p => p.Unit == normalizedUnit);
+        }
+
+        return query;
+    }
+
+    private static IOrderedQueryable<Product> ApplySort(IQueryable<Product> query, string? sort)
+    {
+        return sort?.Trim().ToLowerInvariant() switch
+        {
+            "name" or "name_asc" => query.OrderBy(p => p.Name).ThenBy(p => p.Id),
+            "name_desc" => query.OrderByDescending(p => p.Name).ThenBy(p => p.Id),
+            "price" or "price_asc" => query.OrderBy(p => p.Price).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            "price_desc" => query.OrderByDescending(p => p.Price).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            "stock" or "stock_asc" => query.OrderBy(p => p.Stock).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            "stock_desc" => query.OrderByDescending(p => p.Stock).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            "unit" or "unit_asc" => query.OrderBy(p => p.Unit).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            "unit_desc" => query.OrderByDescending(p => p.Unit).ThenBy(p => p.SortOrder).ThenBy(p => p.Id),
+            _ => query.OrderBy(p => p.SortOrder).ThenBy(p => p.Id)
+        };
+    }
+
+    private static Product? FindExistingProduct(
+        ProductImportRow row,
+        IReadOnlyDictionary<int, Product> productsById,
+        IReadOnlyDictionary<string, Product> productsByName)
+    {
+        if (HasValue(row.Id) && TryParseWholeNumber(row.Id, out var id) && productsById.TryGetValue(id, out var productById))
+            return productById;
+
+        if (HasValue(row.Name) && productsByName.TryGetValue(NormalizeProductName(row.Name), out var productByName))
+            return productByName;
+
+        return null;
+    }
+
+    private static bool TryUpdateProductFromImport(
+        ProductImportRow row,
+        Product product,
+        Dictionary<string, Product> productsByName,
+        ProductImportResultDto result)
+    {
+        var changed = false;
+
+        if (HasValue(row.Name))
+        {
+            var newName = row.Name.Trim();
+            if (newName.Length > 100)
+            {
+                AddImportError(result, row, "Ürün adı en fazla 100 karakter olabilir.");
+                return false;
+            }
+
+            var normalizedOldName = NormalizeProductName(product.Name);
+            var normalizedNewName = NormalizeProductName(newName);
+            if (normalizedNewName != normalizedOldName)
+            {
+                if (productsByName.TryGetValue(normalizedNewName, out var duplicate) && duplicate.Id != product.Id)
+                {
+                    AddImportError(result, row, "Bu isimde başka bir ürün zaten mevcut.");
+                    return false;
+                }
+
+                productsByName.Remove(normalizedOldName);
+                product.Name = newName;
+                productsByName[normalizedNewName] = product;
+                changed = true;
+            }
+        }
+
+        if (HasValue(row.Unit))
+        {
+            var unit = row.Unit.Trim();
+            if (unit.Length > 30)
+            {
+                AddImportError(result, row, "Birim en fazla 30 karakter olabilir.");
+                return false;
+            }
+
+            if (product.Unit != unit)
+            {
+                product.Unit = unit;
+                changed = true;
+            }
+        }
+
+        if (HasValue(row.Price))
+        {
+            if (!TryParseDecimal(row.Price, out var price) || price <= 0)
+            {
+                AddImportError(result, row, "Fiyat 0'dan büyük olmalıdır.");
+                return false;
+            }
+
+            if (product.Price != price)
+            {
+                product.Price = price;
+                changed = true;
+            }
+        }
+
+        if (HasValue(row.Stock))
+        {
+            if (!TryParseStock(row.Stock, out var stock) || stock < 0)
+            {
+                AddImportError(result, row, "Stok negatif olmayan tam sayı olmalıdır.");
+                return false;
+            }
+
+            if (product.Stock != stock)
+            {
+                product.Stock = stock;
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    private static bool TryCreateProductFromImport(
+        ProductImportRow row,
+        ProductImportResultDto result,
+        out Product product)
+    {
+        product = new Product();
+
+        if (!HasValue(row.Id) && !HasValue(row.Name))
+        {
+            result.SkippedCount++;
+            return false;
+        }
+
+        if (!HasValue(row.Name))
+        {
+            AddImportError(result, row, "Yeni ürün eklemek için ürün adı gereklidir.");
+            return false;
+        }
+
+        var name = row.Name.Trim();
+        if (name.Length > 100)
+        {
+            AddImportError(result, row, "Ürün adı en fazla 100 karakter olabilir.");
+            return false;
+        }
+
+        var unit = HasValue(row.Unit) ? row.Unit.Trim() : "Adet";
+        if (unit.Length > 30)
+        {
+            AddImportError(result, row, "Birim en fazla 30 karakter olabilir.");
+            return false;
+        }
+
+        var price = 0.01m;
+        if (HasValue(row.Price) && (!TryParseDecimal(row.Price, out price) || price <= 0))
+        {
+            AddImportError(result, row, "Fiyat 0'dan büyük olmalıdır.");
+            return false;
+        }
+
+        var stock = 0;
+        if (HasValue(row.Stock) && (!TryParseStock(row.Stock, out stock) || stock < 0))
+        {
+            AddImportError(result, row, "Stok negatif olmayan tam sayı olmalıdır.");
+            return false;
+        }
+
+        product = new Product
+        {
+            Name = name,
+            Unit = unit,
+            Price = price,
+            Stock = stock
+        };
+
+        return true;
+    }
+
+    private static void AddImportError(ProductImportResultDto result, ProductImportRow row, string message)
+    {
+        result.Errors.Add(new ProductImportRowErrorDto
+        {
+            RowNumber = row.RowNumber,
+            ProductName = row.Name,
+            Message = message
+        });
+    }
+
+    private static bool TryParseDecimal(string value, out decimal result)
+    {
+        value = value.Trim();
+        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.GetCultureInfo("tr-TR"), out result) ||
+            decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out result);
+    }
+
+    private static bool TryParseStock(string value, out int result)
+    {
+        value = value.Trim();
+        return TryParseWholeNumber(value, out result);
+    }
+
+    private static bool TryParseWholeNumber(string value, out int result)
+    {
+        value = value.Trim();
+        if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result) ||
+            int.TryParse(value, NumberStyles.Integer, CultureInfo.GetCultureInfo("tr-TR"), out result))
+        {
+            return true;
+        }
+
+        if (TryParseDecimal(value, out var decimalValue) && decimalValue == decimal.Truncate(decimalValue))
+        {
+            result = (int)decimalValue;
+            return true;
+        }
+
+        result = 0;
+        return false;
+    }
+
+    private static string NormalizeProductName(string name) =>
+        name.Trim().ToLowerInvariant();
+
+    private static bool HasValue(string value) =>
+        !string.IsNullOrWhiteSpace(value);
 
     private async Task<bool> NameExistsAsync(string name, int? excludeId = null)
     {

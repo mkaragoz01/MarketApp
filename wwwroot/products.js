@@ -8,12 +8,17 @@ const formTitle = document.getElementById("form-title");
 const productsThead = document.getElementById("products-thead");
 const submitBtnText = document.getElementById("submit-btn-text");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
+const excelImportInput = document.getElementById("excel-import-input");
+const excelImportBtn = document.getElementById("excel-import-btn");
+const excelExportBtn = document.getElementById("excel-export-btn");
 const productsBody = document.getElementById("products-body");
 const formMessage = document.getElementById("form-message");
 const loadError = document.getElementById("load-error");
 const refreshBtn = document.getElementById("refresh-btn");
 const productCount = document.getElementById("product-count");
 const searchInput = document.getElementById("search-input");
+const unitFilterSelect = document.getElementById("unit-filter");
+const sortSelect = document.getElementById("sort-select");
 const searchHint = document.getElementById("search-hint");
 const paginationControls = document.getElementById("pagination-controls");
 const prevPageBtn = document.getElementById("prev-page-btn");
@@ -23,6 +28,8 @@ const paginationInfo = document.getElementById("pagination-info");
 let productsCache = [];
 let editingId = null;
 let searchQuery = "";
+let unitFilter = "";
+let sortOption = "sortOrder";
 let draggedRow = null;
 let currentPage = 1;
 let pageSize = DEFAULT_PAGE_SIZE;
@@ -115,11 +122,19 @@ function getFilteredProducts() {
   return productsCache;
 }
 
+function hasActiveFilters() {
+  return Boolean(searchQuery || unitFilter);
+}
+
+function hasCustomListView() {
+  return hasActiveFilters() || sortOption !== "sortOrder";
+}
+
 function updateCount(filtered, total) {
-  if (searchQuery) {
+  if (hasActiveFilters()) {
     productCount.textContent =
       total === 0
-        ? "Aramanızla eşleşen ürün yok"
+        ? "Filtrenizle eşleşen ürün yok"
         : `${total} sonuç bulundu`;
     return;
   }
@@ -135,8 +150,19 @@ function buildProductsUrl() {
   });
 
   if (searchQuery) params.set("search", searchQuery);
+  if (unitFilter) params.set("unit", unitFilter);
+  params.set("sort", sortOption);
 
   return `${API_URL}?${params}`;
+}
+
+function buildProductsExportUrl() {
+  const params = new URLSearchParams();
+  if (searchQuery) params.set("search", searchQuery);
+  if (unitFilter) params.set("unit", unitFilter);
+  params.set("sort", sortOption);
+
+  return `${API_URL}/export?${params}`;
 }
 
 function updatePaginationControls() {
@@ -234,6 +260,101 @@ async function apiDelete(id) {
   }
 }
 
+async function exportProductsToExcel() {
+  if (!requireAdmin()) return;
+
+  excelExportBtn.disabled = true;
+  hideMessage(formMessage);
+
+  try {
+    const response = await fetch(buildProductsExportUrl(), {
+      headers: authHeaders(false),
+    });
+
+    if (!response.ok) {
+      const message = await parseApiError(
+        response,
+        `Excel aktarımı başarısız (${response.status})`
+      );
+      throw new Error(message);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = getDownloadFileName(response) || "products.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+
+    showMessage(formMessage, "Ürünler Excel dosyasına aktarıldı.", "success");
+  } catch (err) {
+    showMessage(formMessage, err.message, "error");
+  } finally {
+    excelExportBtn.disabled = false;
+  }
+}
+
+function getDownloadFileName(response) {
+  const disposition = response.headers.get("Content-Disposition");
+  const match = disposition?.match(/filename\*?=(?:UTF-8''|")?([^";]+)/i);
+  return match ? decodeURIComponent(match[1].replaceAll('"', "")) : null;
+}
+
+async function importProductsFromExcel(file) {
+  if (!requireAdmin()) return;
+
+  excelImportBtn.disabled = true;
+  excelExportBtn.disabled = true;
+  hideMessage(formMessage);
+
+  try {
+    const formData = new FormData();
+    if (!file.size) {
+      throw new Error("Seçilen Excel dosyası boş görünüyor.");
+    }
+
+    formData.append("file", file, file.name);
+
+    const response = await fetch(`${API_URL}/import`, {
+      method: "POST",
+      headers: authHeaders(false),
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const message = await parseApiError(
+        response,
+        `Excel içe aktarma başarısız (${response.status})`
+      );
+      throw new Error(message);
+    }
+
+    const result = await response.json();
+    const importedCount = result.importedCount ?? result.ImportedCount ?? 0;
+    const updatedCount = result.updatedCount ?? result.UpdatedCount ?? 0;
+    const skippedCount = result.skippedCount ?? result.SkippedCount ?? 0;
+    const errors = result.errors ?? result.Errors ?? [];
+    const errorText = errors.length ? `, ${errors.length} hata` : "";
+
+    showMessage(
+      formMessage,
+      `Excel içe aktarıldı: ${importedCount} ürün eklendi, ${updatedCount} ürün güncellendi, ${skippedCount} satır atlandı${errorText}.`,
+      errors.length ? "error" : "success"
+    );
+
+    await loadProducts();
+  } catch (err) {
+    showMessage(formMessage, err.message, "error");
+  } finally {
+    excelImportInput.value = "";
+    excelImportBtn.disabled = false;
+    excelExportBtn.disabled = false;
+  }
+}
+
 async function loadProducts() {
   hideMessage(loadError);
   updateTableHeader();
@@ -277,7 +398,7 @@ async function loadProducts() {
 function applySearchAndRender() {
   updateTableHeader();
   const filtered = getFilteredProducts();
-  searchHint.hidden = !searchQuery;
+  searchHint.hidden = !hasCustomListView();
   updateCount(filtered.length, totalProductsCount);
   updatePaginationControls();
   renderProducts(filtered);
@@ -285,12 +406,12 @@ function applySearchAndRender() {
 
 function renderProducts(products) {
   const isAdmin = window.Auth?.isAdmin() ?? false;
-  const dragEnabled = isAdmin && !searchQuery;
+  const dragEnabled = isAdmin && !hasCustomListView();
   const colspan = getColSpan();
 
   if (!products.length) {
-    const msg = searchQuery
-      ? "Aramanızla eşleşen ürün yok."
+    const msg = hasActiveFilters()
+      ? "Filtrenizle eşleşen ürün yok."
       : isAdmin
         ? "Henüz ürün yok. Ürün yönetimi panelinden ekleyin."
         : "Henüz ürün yok.";
@@ -318,7 +439,7 @@ function renderProducts(products) {
       return `
     <tr class="${isEditingRow ? "row-editing" : ""}" data-id="${p.id}">
       <td class="col-drag">
-        <span class="${handleClass}" draggable="${draggable}" title="${dragEnabled ? "Sürükleyerek sırala" : "Aramayı temizleyin"}">⠿</span>
+        <span class="${handleClass}" draggable="${draggable}" title="${dragEnabled ? "Sürükleyerek sırala" : "Filtreleri temizleyin"}">⠿</span>
       </td>
       <td class="id-cell">${p.id}</td>
       <td>${escapeHtml(p.name)}</td>
@@ -411,7 +532,7 @@ async function saveReorderFromDom() {
 }
 
 productsBody.addEventListener("dragstart", (e) => {
-  if (!window.Auth?.isAdmin() || searchQuery) {
+  if (!window.Auth?.isAdmin() || hasCustomListView()) {
     e.preventDefault();
     if (!window.Auth?.isAdmin()) requireAdmin();
     return;
@@ -438,7 +559,7 @@ productsBody.addEventListener("dragend", () => {
 });
 
 productsBody.addEventListener("dragover", (e) => {
-  if (!draggedRow || searchQuery) return;
+  if (!draggedRow || hasCustomListView()) return;
   e.preventDefault();
 
   const row = e.target.closest("tr[data-id]");
@@ -453,7 +574,7 @@ productsBody.addEventListener("dragover", (e) => {
 
 productsBody.addEventListener("drop", async (e) => {
   e.preventDefault();
-  if (!draggedRow || searchQuery || !window.Auth?.isAdmin()) return;
+  if (!draggedRow || hasCustomListView() || !window.Auth?.isAdmin()) return;
 
   const targetRow = e.target.closest("tr[data-id]");
   targetRow?.classList.remove("drag-over");
@@ -544,7 +665,7 @@ form.addEventListener("submit", async (e) => {
       resetForm();
       showMessage(formMessage, "Ürün başarıyla eklendi.", "success");
       await loadProducts();
-      if (!searchQuery) {
+      if (!hasCustomListView()) {
         currentPage = totalPages;
         applySearchAndRender();
       }
@@ -565,6 +686,31 @@ searchInput.addEventListener("input", () => {
   window.clearTimeout(searchDebounceId);
   searchDebounceId = window.setTimeout(loadProducts, 250);
 });
+
+unitFilterSelect.addEventListener("change", () => {
+  unitFilter = unitFilterSelect.value;
+  currentPage = 1;
+  loadProducts();
+});
+
+sortSelect.addEventListener("change", () => {
+  sortOption = sortSelect.value || "sortOrder";
+  currentPage = 1;
+  loadProducts();
+});
+
+excelImportBtn.addEventListener("click", () => {
+  if (!requireAdmin()) return;
+  excelImportInput.click();
+});
+
+excelImportInput.addEventListener("change", () => {
+  const file = excelImportInput.files?.[0];
+  if (!file) return;
+  importProductsFromExcel(file);
+});
+
+excelExportBtn.addEventListener("click", exportProductsToExcel);
 
 cancelEditBtn.addEventListener("click", resetForm);
 refreshBtn.addEventListener("click", loadProducts);

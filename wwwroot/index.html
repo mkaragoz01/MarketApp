@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=nav-20260606b" />
+  <link rel="stylesheet" href="style.css?v=excel-20260627b" />
 </head>
 <body data-page="products">
   <div class="page">
@@ -46,7 +46,14 @@
         <div class="panel-header">
           <span class="panel-icon panel-icon-accent" aria-hidden="true">+</span>
           <div>
-            <h2 class="panel-title" id="form-title">Yeni ürün ekle</h2>
+            <div class="management-title-row">
+              <h2 class="panel-title" id="form-title">Yeni ürün ekle</h2>
+              <div class="excel-actions">
+                <input type="file" id="excel-import-input" name="file" accept=".xlsx" hidden />
+                <button type="button" id="excel-import-btn" class="btn btn-excel">Excelden al</button>
+                <button type="button" id="excel-export-btn" class="btn btn-excel">Dışa aktar</button>
+              </div>
+            </div>
             <p class="panel-desc">Ürün ekleme ve güncelleme</p>
           </div>
         </div>
@@ -104,8 +111,25 @@
 
         <div class="search-row">
           <input type="search" id="search-input" class="search-input" placeholder="Ürün adıyla ara…" autocomplete="off" />
+          <select id="unit-filter" class="filter-select" aria-label="Birim filtresi">
+            <option value="">Tüm birimler</option>
+            <option value="Adet">Adet</option>
+            <option value="Kg">Kg</option>
+            <option value="Litre">Litre</option>
+            <option value="Paket">Paket</option>
+          </select>
+          <select id="sort-select" class="filter-select" aria-label="Sıralama">
+            <option value="sortOrder">Varsayılan sıra</option>
+            <option value="name_asc">Ürün adı A-Z</option>
+            <option value="name_desc">Ürün adı Z-A</option>
+            <option value="price_asc">Fiyat artan</option>
+            <option value="price_desc">Fiyat azalan</option>
+            <option value="stock_asc">Stok artan</option>
+            <option value="stock_desc">Stok azalan</option>
+            <option value="unit_asc">Birim A-Z</option>
+          </select>
           <p id="search-hint" class="search-hint" hidden>
-            Arama açıkken sıralama devre dışı. Sonuçlar sayfa sayfa getirilir.
+            Filtre veya özel sıralama açıkken sürükle-bırak sıralama devre dışı.
           </p>
         </div>
 
@@ -145,6 +169,6 @@
   </div>
 
   <script src="auth.js?v=nav-20260606b"></script>
-  <script src="products.js?v=nav-20260606b"></script>
+  <script src="products.js?v=excel-20260627b"></script>
 </body>
 </html>

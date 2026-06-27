@@ -5,7 +5,9 @@ namespace MarketApp.Services;
 
 public interface IProductService
 {
-    Task<PagedResultDto<ProductDto>> GetPagedAsync(int page, int pageSize, string? search);
+    Task<PagedResultDto<ProductDto>> GetPagedAsync(int page, int pageSize, string? search, string? unit, string? sort);
+    Task<byte[]> ExportExcelAsync(string? search, string? unit, string? sort);
+    Task<ProductImportResultDto> ImportExcelAsync(Stream stream, string fileName);
     Task<ProductDto?> GetByIdAsync(int id);
     Task<(ProductDto? Product, ProductOperationError Error, string? Message)> CreateAsync(CreateProductDto dto);
     Task<(bool Success, ProductOperationError Error, string? Message)> UpdateAsync(int id, UpdateProductDto dto);

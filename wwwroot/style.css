@@ -219,6 +219,13 @@ body {
   font-weight: 600;
 }
 
+.management-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .panel-desc {
   margin: 0.2rem 0 0;
   font-size: 0.85rem;
@@ -474,10 +481,15 @@ body {
 }
 
 .search-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: start;
   margin-bottom: 1rem;
 }
 
-.search-input {
+.search-input,
+.filter-select {
   width: 100%;
   padding: 0.7rem 1rem;
   border: 1px solid var(--border);
@@ -488,13 +500,19 @@ body {
   background: var(--bg-soft);
 }
 
-.search-input:focus {
+.filter-select {
+  cursor: pointer;
+}
+
+.search-input:focus,
+.filter-select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
 
 .search-hint {
+  grid-column: 1 / -1;
   margin: 0.5rem 0 0;
   font-size: 0.8rem;
   color: var(--warn);
@@ -544,6 +562,30 @@ body {
 .form-actions .btn-primary {
   flex: 1;
   min-width: 140px;
+}
+
+.excel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.excel-actions .btn {
+  min-width: 108px;
+}
+
+.btn-excel {
+  padding: 0.4rem 0.65rem;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(61, 214, 140, 0.25);
+  font-size: 0.8rem;
+}
+
+.btn-excel:hover {
+  color: #0a1612;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .user-form-grid {
@@ -1003,5 +1045,9 @@ tbody tr.row-editing td {
 
   .log-filter-grid {
     grid-template-columns: 0.8fr 1.4fr 1fr 1fr;
+  }
+
+  .search-row {
+    grid-template-columns: minmax(14rem, 1fr) minmax(9rem, 0.35fr) minmax(11rem, 0.45fr);
   }
 }
